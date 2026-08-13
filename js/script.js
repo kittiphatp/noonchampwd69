@@ -379,11 +379,9 @@ function renderPostits(reset = true) {
 function loadMoreWishes() {
   const board = document.getElementById('wish-board');
   const countBadge = document.getElementById('board-count-badge');
-  const loadMoreBtn = document.getElementById('btn-load-more');
   if (!board || !wishes || wishes.length === 0) return;
   
   if (displayedWishCount >= wishes.length) {
-    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
     if (countBadge) countBadge.textContent = `💌 รวม ${wishes.length} คำอวยพร`;
     return;
   }
@@ -427,18 +425,12 @@ function loadMoreWishes() {
   board.appendChild(fragment);
   displayedWishCount = nextCount;
   
-  // Update badge & load more button
+  // Update badge
   if (countBadge) {
     if (displayedWishCount >= wishes.length) {
       countBadge.textContent = `💌 รวม ${wishes.length} คำอวยพร`;
-      if (loadMoreBtn) loadMoreBtn.style.display = 'none';
     } else {
       countBadge.textContent = `💌 แสดง ${displayedWishCount} จาก ${wishes.length} คำอวยพร`;
-      if (loadMoreBtn) {
-        loadMoreBtn.style.display = 'inline-flex';
-        const remaining = wishes.length - displayedWishCount;
-        loadMoreBtn.textContent = `✨ ดูเพิ่ม (+${Math.min(WISH_PAGE_SIZE, remaining)})`;
-      }
     }
   }
 }
@@ -454,7 +446,7 @@ function scrollBoard(direction) {
     // Check if scrolled near bottom to load more
     if (displayedWishCount < wishes.length) {
       setTimeout(() => {
-        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 200) {
+        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 250) {
           loadMoreWishes();
         }
       }, 300);
@@ -462,19 +454,36 @@ function scrollBoard(direction) {
   }
 }
 
-// Auto lazy loading on user scrolling down inside the board container
+// Auto lazy loading on user scrolling down inside the board container or page window
 function initWishBoardScrollListener() {
   const container = document.getElementById('wish-board-container');
   if (!container) return;
   
   let isThrottled = false;
+  
+  // 1. Scroll inside the post-it board container
   container.addEventListener('scroll', () => {
     if (isThrottled) return;
     isThrottled = true;
     setTimeout(() => { isThrottled = false; }, 150);
     
     if (displayedWishCount < wishes.length) {
-      if (container.scrollTop + container.clientHeight >= container.scrollHeight - 180) {
+      if (container.scrollTop + container.clientHeight >= container.scrollHeight - 250) {
+        loadMoreWishes();
+      }
+    }
+  }, { passive: true });
+
+  // 2. Scroll the main page (highly useful for mobile where window scroll is primary)
+  window.addEventListener('scroll', () => {
+    if (isThrottled) return;
+    isThrottled = true;
+    setTimeout(() => { isThrottled = false; }, 150);
+    
+    if (displayedWishCount < wishes.length) {
+      const rect = container.getBoundingClientRect();
+      // If the bottom of the board container is close to or visible in the viewport
+      if (rect.bottom <= window.innerHeight + 250) {
         loadMoreWishes();
       }
     }

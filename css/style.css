@@ -560,11 +560,11 @@
   /* Connecting Horizontal Bar */
   .h-timeline-line {
     position: absolute;
-    top: 72px;
-    left: 10%;
-    right: 10%;
+    top: 79.5px;
+    left: 12.5%;
+    right: 12.5%;
     height: 3px;
-    background: linear-gradient(90deg, #6e7f57, #8ba06e, #6e7f57);
+    background: linear-gradient(90deg, var(--gold), #f3dca3, var(--gold));
     border-radius: 2px;
     z-index: 1;
   }
@@ -603,17 +603,17 @@
     width: 15px;
     height: 15px;
     border-radius: 50%;
-    background: #6e7f57;
+    background: var(--gold);
     border: 3px solid #ffffff;
-    box-shadow: 0 0 0 2px #6e7f57, 0 3px 8px rgba(110, 127, 87, 0.3);
+    box-shadow: 0 0 0 2px var(--gold), 0 3px 8px rgba(201, 169, 110, 0.45);
     margin-bottom: 16px;
     transition: all 0.3s ease;
   }
 
   .h-timeline-step:hover .h-step-node {
     transform: scale(1.3);
-    background: var(--gold);
-    box-shadow: 0 0 0 3px var(--gold), 0 0 12px rgba(201, 169, 110, 0.6);
+    background: #ffd993;
+    box-shadow: 0 0 0 3px var(--gold), 0 0 12px rgba(201, 169, 110, 0.7);
   }
 
   .h-step-content {
@@ -664,17 +664,20 @@
       padding-left: 6px;
     }
 
-    /* Continuous Vertical Line running through all steps */
+    /* Hide the parent absolute line */
     .h-timeline-line {
-      display: block;
+      display: none;
+    }
+
+    /* Draw connecting line between nodes using pseudo-elements */
+    .h-timeline-step:not(:last-child)::after {
+      content: '';
       position: absolute;
-      top: 26px;
-      bottom: 26px;
-      left: 28px;
-      right: auto;
+      top: 24px;
+      bottom: -24px;
+      left: 24px; /* Center of 48px icon-wrap */
       width: 3px;
-      height: auto;
-      background: linear-gradient(180deg, #6e7f57 0%, #8ba06e 60%, var(--gold) 100%);
+      background: linear-gradient(180deg, var(--gold) 0%, #f3dca3 50%, var(--gold) 100%);
       border-radius: 2px;
       z-index: 1;
     }
@@ -699,8 +702,8 @@
       height: 48px;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.95);
-      border: 2px solid #8ba06e;
-      box-shadow: 0 4px 14px rgba(110, 127, 87, 0.18);
+      border: 2px solid var(--gold);
+      box-shadow: 0 4px 14px rgba(201, 169, 110, 0.25);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -760,10 +763,10 @@
     .horizontal-timeline-container {
       padding: 28px 16px;
     }
-    .h-timeline-line {
-      left: 24px;
-      top: 24px;
-      bottom: 24px;
+    .h-timeline-step:not(:last-child)::after {
+      top: 20px;
+      bottom: -20px;
+      left: 20px; /* Center of 40px icon-wrap */
     }
     .h-step-icon-wrap {
       width: 40px;
