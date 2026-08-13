@@ -576,83 +576,117 @@ async function loadWishes() {
 }
 
 async function submitWish() {
-  const name = document.getElementById('wish-name').value.trim();
-  const msg  = document.getElementById('wish-msg').value.trim();
+  const nameInput = document.getElementById('wish-name');
+  const msgInput  = document.getElementById('wish-msg');
+  const name = nameInput.value.trim();
+  const msg  = msgInput.value.trim();
+
   if (!name) { alert('กรุณาใส่ชื่อของคุณด้วยนะคะ 😊'); return; }
   if (!msg)  { alert('กรุณาเขียนคำอวยพรก่อนส่งนะคะ 💕'); return; }
 
   const btn = document.querySelector('.btn-wish');
   btn.disabled = true;
-  btn.textContent = '⏳ กำลังตรวจสอบข้อมูล...';
 
-  // Ensure avatar image is compressed if file selected
-  const fileInput = document.getElementById('wish-image');
-  if (fileInput && fileInput.files && fileInput.files[0] && !avatarBase64) {
-    try {
-      avatarBase64 = await resizeAndCompressImage(fileInput.files[0]);
-    } catch(e) {}
-  }
-
-  // Retrieve IP and Coordinates with fallbacks
-  const meta = await getIPAndLocation();
-
-  btn.textContent = '⏳ กำลังส่งคำอวยพร...';
-
+  // Snapshot avatar & current time
+  const currentAvatar = avatarBase64 || '';
   const now = new Date();
-  const time = now.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'numeric' });
-
-  const payload = {
-    type: 'wish',
-    name: name,
-    message: msg,
-    ip: meta.ip || '',
-    lat: meta.lat || '',
-    lng: meta.lng || '',
-    avatar: avatarBase64 || ''
-  };
+  const dateStr = now.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
+  const time = `${dateStr} ${timeStr} น.`;
 
   const newWishItem = { 
     name, 
     message: msg, 
     time, 
-    ip: meta.ip || '', 
-    lat: meta.lat || '', 
-    lng: meta.lng || '', 
-    avatar: avatarBase64 || '' 
+    ip: userIP || '', 
+    lat: '', 
+    lng: '', 
+    avatar: currentAvatar 
   };
 
+  // 1. INSTANT OPTIMISTIC UI: Update the board immediately (0ms wait)
+  wishes.unshift(newWishItem);
   try {
-    await fetch(WISH_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    
-    // Add locally to the board immediately
-    wishes.unshift(newWishItem);
+    localStorage.setItem(WISH_CACHE_KEY, JSON.stringify(wishes));
+  } catch(e) {}
+  
+  renderPostits(true);
+  
+  // Smoothly scroll the wish board container to the top so new card is in view
+  const container = document.getElementById('wish-board-container');
+  if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Clear input fields immediately
+  nameInput.value = '';
+  msgInput.value = '';
+  removeAvatar();
+  
+  // Instant visual feedback for user
+  btn.textContent = '🎉 ส่งคำอวยพรเรียบร้อยแล้ว!';
+  setTimeout(() => { 
+    btn.disabled = false; 
+    btn.textContent = '💌 ส่งคำอวยพร'; 
+  }, 2000);
+
+  // 2. BACKGROUND ASYNC SYNC: Send to Google Sheets in background without blocking the user
+  (async () => {
     try {
-      localStorage.setItem(WISH_CACHE_KEY, JSON.stringify(wishes));
-    } catch(e) {}
-    
-    renderPostits(true);
-    
-    // Scroll container to top so new post-it is visible immediately
-    const container = document.getElementById('wish-board-container');
-    if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    document.getElementById('wish-name').value = '';
-    document.getElementById('wish-msg').value = '';
-    removeAvatar();
-    
-    btn.textContent = '✅ ส่งแล้ว!';
-    setTimeout(() => { btn.disabled = false; btn.textContent = '💌 ส่งคำอวยพร'; }, 2000);
-  } catch(err) {
-    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
-    btn.disabled = false;
-    btn.textContent = '💌 ส่งคำอวยพร';
-  }
+      let meta = { ip: userIP || '', lat: '', lng: '' };
+      try {
+        meta = await getIPAndLocation();
+      } catch(e) {}
+
+      const payload = {
+        type: 'wish',
+        name: name,
+        message: msg,
+        ip: meta.ip || userIP || '',
+        lat: meta.lat || '',
+        lng: meta.lng || '',
+        avatar: currentAvatar
+      };
+
+      await fetch(WISH_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(err) {
+      console.warn('Background wish sync:', err);
+    }
+  })();
 }
+
+// ===== NAVIGATION & HAMBURGER MENU =====
+function toggleNavMenu() {
+  const toggle = document.getElementById('nav-toggle');
+  const links = document.getElementById('nav-links');
+  const backdrop = document.getElementById('nav-backdrop');
+  if (!toggle || !links) return;
+
+  const isActive = toggle.classList.toggle('active');
+  links.classList.toggle('active', isActive);
+  if (backdrop) backdrop.classList.toggle('active', isActive);
+  document.body.style.overflow = isActive ? 'hidden' : '';
+}
+
+function closeNavMenu() {
+  const toggle = document.getElementById('nav-toggle');
+  const links = document.getElementById('nav-links');
+  const backdrop = document.getElementById('nav-backdrop');
+  if (toggle) toggle.classList.remove('active');
+  if (links) links.classList.remove('active');
+  if (backdrop) backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Close nav menu on window resize if resized to desktop (> 768px)
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    closeNavMenu();
+  }
+});
 
 // Initial immediate render and scroll listener setup
 initWishBoardScrollListener();

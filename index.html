@@ -10,14 +10,25 @@
 <body>
 
 <!-- NAV -->
-<nav>
-  <a href="#hero">หน้าแรก</a>
-  <a href="#savedate">Save the Date</a>
-  <a href="#location">สถานที่</a>
-  <a href="#schedule">กำหนดการ</a>
-  <a href="#dresscode">Dress Code</a>
-  <a href="#wishes">อวยพร</a>
+<nav id="navbar">
+  <div class="nav-container">
+    <a href="#hero" class="nav-brand">นุ่น <span>♥</span> แชมป์</a>
+    <button type="button" class="nav-hamburger" id="nav-toggle" aria-label="เปิดเมนู" onclick="toggleNavMenu()">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+    <div class="nav-links" id="nav-links">
+      <a href="#hero" onclick="closeNavMenu()">หน้าแรก</a>
+      <a href="#schedule" onclick="closeNavMenu()">กำหนดการ</a>
+      <a href="#location" onclick="closeNavMenu()">สถานที่</a>
+      <a href="#dresscode" onclick="closeNavMenu()">Dress Code</a>
+      <a href="#savedate" onclick="closeNavMenu()">Save the Date</a>
+      <a href="#wishes" onclick="closeNavMenu()">อวยพร</a>
+    </div>
+  </div>
 </nav>
+<div class="nav-backdrop" id="nav-backdrop" onclick="closeNavMenu()"></div>
 
 <!-- HERO -->
 <div id="hero">
@@ -39,57 +50,6 @@
   </div>
   <div class="hero-divider"></div>
   <div class="hero-date">วันที่ ๒๘ พฤศจิกายน ๒๕๖๙</div>
-</div>
-
-<!-- SAVE THE DATE -->
-<div id="savedate">
-  <section>
-    <div class="section-title">
-      <h2>Save the Date</h2>
-      <p>กรุณาจองวันที่สำคัญนี้ไว้ในใจของคุณ</p>
-      <div class="section-line"></div>
-    </div>
-    <div class="savedate-card">
-      <div class="savedate-when">วันเสาร์ที่ 28 พฤศจิกายน 2569</div>
-      <div class="savedate-where">📍 ขจี คาเฟ่ แอนด์รีสอร์ท · สุพรรณบุรี</div>
-      <div class="countdown-grid" id="countdown">
-        <div class="count-box"><span class="count-num" id="cd-days">--</span><span class="count-label">วัน</span></div>
-        <div class="count-box"><span class="count-num" id="cd-hours">--</span><span class="count-label">ชั่วโมง</span></div>
-        <div class="count-box"><span class="count-num" id="cd-mins">--</span><span class="count-label">นาที</span></div>
-        <div class="count-box"><span class="count-num" id="cd-secs">--</span><span class="count-label">วินาที</span></div>
-      </div>
-      <p style="font-size:0.9rem; color: var(--text); opacity:0.8;">เราตั้งตารอที่จะแบ่งปันช่วงเวลาพิเศษนี้ร่วมกับคุณ 💕</p>
-    </div>
-  </section>
-</div>
-
-<!-- LOCATION -->
-<div id="location">
-  <section>
-    <div class="section-title">
-      <h2>สถานที่จัดงาน</h2>
-      <p>ขจี คาเฟ่ แอนด์รีสอร์ท</p>
-      <div class="section-line"></div>
-    </div>
-    <!-- Venue Photo -->
-    <div style="border-radius:24px; overflow:hidden; box-shadow:0 10px 60px rgba(200,230,201,0.4); margin-bottom:24px; height:280px; position:relative;">
-      <img src="https://lh3.googleusercontent.com/p/AF1QipMzVsdAfLPktuYFb8UciZFRXFqOhkuPIBvSZPBq=w1200-h600-k-no"
-           alt="ขจี คาเฟ่ แอนด์รีสอร์ท"
-           style="width:100%; height:100%; object-fit:cover; display:block;">
-      <div style="position:absolute; bottom:0; left:0; right:0; padding:20px 24px; background:linear-gradient(to top, rgba(90,74,66,0.75), transparent);">
-        <div style="color:white; font-size:1.1rem; font-weight:500; letter-spacing:1px;">📍 ขจี คาเฟ่ แอนด์รีสอร์ท</div>
-        <div style="color:rgba(255,255,255,0.8); font-size:0.82rem; margin-top:2px;">สองพี่น้อง · สุพรรณบุรี</div>
-      </div>
-    </div>
-
-    <!-- Map -->
-    <div class="map-container">
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3874.5!2d100.0600364!3d14.204032!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e251a867f0224f%3A0x4b85a4e285ed3088!2sKaJee%20Cafe'%20and%20Hostel!5e0!3m2!1sth!2sth!4v1700000000002!5m2!1sth!2sth"
-        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
-    </div>
-  </section>
 </div>
 
 <!-- SCHEDULE -->
@@ -163,6 +123,35 @@
   </section>
 </div>
 
+<!-- LOCATION -->
+<div id="location">
+  <section>
+    <div class="section-title">
+      <h2>สถานที่จัดงาน</h2>
+      <p>ขจี คาเฟ่ แอนด์รีสอร์ท</p>
+      <div class="section-line"></div>
+    </div>
+    <!-- Venue Photo -->
+    <div style="border-radius:24px; overflow:hidden; box-shadow:0 10px 60px rgba(200,230,201,0.4); margin-bottom:24px; height:280px; position:relative;">
+      <img src="https://lh3.googleusercontent.com/p/AF1QipMzVsdAfLPktuYFb8UciZFRXFqOhkuPIBvSZPBq=w1200-h600-k-no"
+           alt="ขจี คาเฟ่ แอนด์รีสอร์ท"
+           style="width:100%; height:100%; object-fit:cover; display:block;">
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:20px 24px; background:linear-gradient(to top, rgba(90,74,66,0.75), transparent);">
+        <div style="color:white; font-size:1.1rem; font-weight:500; letter-spacing:1px;">📍 ขจี คาเฟ่ แอนด์รีสอร์ท</div>
+        <div style="color:rgba(255,255,255,0.8); font-size:0.82rem; margin-top:2px;">สองพี่น้อง · สุพรรณบุรี</div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="map-container">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3874.5!2d100.0600364!3d14.204032!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e251a867f0224f%3A0x4b85a4e285ed3088!2sKaJee%20Cafe'%20and%20Hostel!5e0!3m2!1sth!2sth!4v1700000000002!5m2!1sth!2sth"
+        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </section>
+</div>
+
 <!-- DRESS CODE -->
 <div id="dresscode">
   <section>
@@ -200,6 +189,28 @@
           <div class="color-swatch-th">เขียวเซจ</div>
         </div>
       </div>
+    </div>
+  </section>
+</div>
+
+<!-- SAVE THE DATE -->
+<div id="savedate">
+  <section>
+    <div class="section-title">
+      <h2>Save the Date</h2>
+      <p>กรุณาจองวันที่สำคัญนี้ไว้ในใจของคุณ</p>
+      <div class="section-line"></div>
+    </div>
+    <div class="savedate-card">
+      <div class="savedate-when">วันเสาร์ที่ 28 พฤศจิกายน 2569</div>
+      <div class="savedate-where">📍 ขจี คาเฟ่ แอนด์รีสอร์ท · สุพรรณบุรี</div>
+      <div class="countdown-grid" id="countdown">
+        <div class="count-box"><span class="count-num" id="cd-days">--</span><span class="count-label">วัน</span></div>
+        <div class="count-box"><span class="count-num" id="cd-hours">--</span><span class="count-label">ชั่วโมง</span></div>
+        <div class="count-box"><span class="count-num" id="cd-mins">--</span><span class="count-label">นาที</span></div>
+        <div class="count-box"><span class="count-num" id="cd-secs">--</span><span class="count-label">วินาที</span></div>
+      </div>
+      <p style="font-size:0.9rem; color: var(--text); opacity:0.8;">เราตั้งตารอที่จะแบ่งปันช่วงเวลาพิเศษนี้ร่วมกับคุณ 💕</p>
     </div>
   </section>
 </div>
