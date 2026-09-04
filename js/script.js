@@ -151,74 +151,8 @@ document.querySelector('.map-container iframe').onerror = function() {
 
 const WISH_URL = 'https://script.google.com/macros/s/AKfycbyjg_XOWugjPU9_NSL-PxmLgPhC8AEvvH7oFUS5dd3IgvmPBVNJwezJZoyP3xLkvMLA_Q/exec';
 
-let userIP = '';
 let avatarBase64 = '';
 let wishes = [];
-
-// ===== RETRIEVE METADATA WITH MULTI-SERVICE FALLBACKS =====
-async function getIPAndLocation() {
-  let ip = userIP || '';
-  let lat = '';
-  let lng = '';
-
-  // 1. Try Browser GPS first
-  try {
-    const coords = await getBrowserCoordinates();
-    if (coords) {
-      lat = coords.lat;
-      lng = coords.lng;
-    }
-  } catch (e) {}
-
-  // 2. If IP or Coordinates missing, fetch from IP API service
-  if (!ip || !lat || !lng) {
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      if (res.ok) {
-        const data = await res.json();
-        if (!ip && data.ip) ip = String(data.ip);
-        if (!lat && data.latitude) lat = String(data.latitude);
-        if (!lng && data.longitude) lng = String(data.longitude);
-      }
-    } catch (e) {}
-  }
-
-  // 3. Fallback for IP only if still missing
-  if (!ip) {
-    try {
-      const res = await fetch('https://api.ipify.org?format=json');
-      if (res.ok) {
-        const data = await res.json();
-        ip = String(data.ip);
-      }
-    } catch (e) {}
-  }
-
-  userIP = ip;
-  return { ip, lat, lng };
-}
-
-function getBrowserCoordinates() {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve(null);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          lat: String(position.coords.latitude),
-          lng: String(position.coords.longitude)
-        });
-      },
-      () => resolve(null),
-      { timeout: 4000 }
-    );
-  });
-}
-
-// Pre-fetch IP on page load
-getIPAndLocation();
 
 // ===== AVATAR UPLOAD HANDLING =====
 function previewAvatar(event) {
@@ -607,9 +541,6 @@ async function submitWish() {
     name, 
     message: msg, 
     time, 
-    ip: userIP || '', 
-    lat: '', 
-    lng: '', 
     avatar: currentAvatar 
   };
 
@@ -640,18 +571,10 @@ async function submitWish() {
   // 2. BACKGROUND ASYNC SYNC: Send to Google Sheets in background without blocking the user
   (async () => {
     try {
-      let meta = { ip: userIP || '', lat: '', lng: '' };
-      try {
-        meta = await getIPAndLocation();
-      } catch(e) {}
-
       const payload = {
         type: 'wish',
         name: name,
         message: msg,
-        ip: meta.ip || userIP || '',
-        lat: meta.lat || '',
-        lng: meta.lng || '',
         avatar: currentAvatar
       };
 
