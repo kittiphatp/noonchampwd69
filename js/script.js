@@ -624,3 +624,84 @@ window.addEventListener('resize', () => {
 initWishBoardScrollListener();
 renderPostits(true);
 loadWishes();
+// ===== BACKGROUND MUSIC (YouTube embed) =====
+(function () {
+  const VIDEO_ID = 'oMjyWlc-1Bs';
+  const btn = document.getElementById('music-toggle');
+  if (!btn || !document.getElementById('yt-bgm')) return;
+
+  let player = null;
+  let userPaused = false;
+
+  function isPlaying() {
+    return player && player.getPlayerState && player.getPlayerState() === YT.PlayerState.PLAYING;
+  }
+
+  function syncUI() {
+    const playing = isPlaying();
+    btn.classList.toggle('playing', playing);
+    btn.setAttribute('aria-pressed', String(playing));
+  }
+
+  function playWithSound() {
+    if (!player) return;
+    player.unMute();
+    player.setVolume(50);
+    player.playVideo();
+  }
+
+  // Browsers allow muted autoplay only; turn the sound on at the first tap, click, key or scroll.
+  const unlockEvents = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'];
+  function unlock(e) {
+    if (e && e.target && btn.contains(e.target)) return; // the toggle button handles itself
+    if (!player || userPaused) return;
+    playWithSound();
+    unlockEvents.forEach(ev => window.removeEventListener(ev, unlock));
+  }
+  unlockEvents.forEach(ev => window.addEventListener(ev, unlock, { passive: true }));
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!player) return;
+    if (isPlaying() && !player.isMuted()) {
+      userPaused = true;
+      player.pauseVideo();
+    } else {
+      userPaused = false;
+      playWithSound();
+    }
+    syncUI();
+  });
+
+  window.onYouTubeIframeAPIReady = function () {
+    player = new YT.Player('yt-bgm', {
+      width: '100%',
+      height: '100%',
+      videoId: VIDEO_ID,
+      playerVars: {
+        autoplay: 1,
+        mute: 1,
+        loop: 1,
+        playlist: VIDEO_ID, // required for loop=1 on a single video
+        controls: 1,
+        playsinline: 1,
+        rel: 0
+      },
+      events: {
+        onReady: (ev) => { ev.target.playVideo(); syncUI(); },
+        onStateChange: (ev) => {
+          // Loop forever, even if the player's own loop misses the restart
+          if (ev.data === YT.PlayerState.ENDED && !userPaused) {
+            ev.target.seekTo(0, true);
+            ev.target.playVideo();
+          }
+          syncUI();
+        }
+      }
+    });
+  };
+
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
